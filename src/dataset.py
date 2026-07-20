@@ -3,7 +3,7 @@ from datasets import load_dataset
 from transformers import AutoTokenizer, DataCollatorWithPadding
 import numpy as np
 import os
-from MentalHealthEmotionDetection.src.utils import logger
+from src.utils import logger
 
 class EmotionDatasetManager:
     """

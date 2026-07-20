@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDEs and VS Code
+.vscode/
+.idea/
+
+# Data and Models
+dataset/
+models/
+outputs/
+*.safetensors
+*.bin
+
+# Logs
+*.log
+logs/
+
+# Streamlit
+.streamlit/

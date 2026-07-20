@@ -1,6 +1,6 @@
 import torch
 from transformers import AutoModelForSequenceClassification
-from MentalHealthEmotionDetection.src.utils import logger
+from src.utils import logger
 
 def get_model(model_name="roberta-base", num_labels=28, id2label=None, label2id=None):
     """

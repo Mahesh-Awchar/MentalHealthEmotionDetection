@@ -2,22 +2,61 @@ import os
 import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-from MentalHealthEmotionDetection.src.utils import logger
+from src.utils import logger
 
 class EmotionPredictor:
     """
     Handles loading the trained model and making real-time emotion predictions.
     """
-    def __init__(self, model_path="models/roberta_goemotions_model", tokenizer_path="roberta-base"):
+    def __init__(self, model_path="models/roberta_goemotions_model", tokenizer_path=None):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        local_model_path = None
+        if os.path.exists(model_path) or os.path.exists(os.path.join(model_path, "config.json")):
+            local_model_path = model_path
+        elif os.path.exists("models/roberta_goemotions_model"):
+            local_model_path = "models/roberta_goemotions_model"
+        elif os.path.exists("models"):
+            local_model_path = "models"
+
+        if tokenizer_path is None:
+            if os.path.exists("models/roberta_goemotions_tokenizer"):
+                tokenizer_path = "models/roberta_goemotions_tokenizer"
+            elif local_model_path and os.path.exists(os.path.join(local_model_path, "tokenizer.json")):
+                tokenizer_path = local_model_path
+            else:
+                tokenizer_path = model_path
+
+        self.emotion_labels = [
+            "admiration", "amusement", "anger", "annoyance",
+            "approval", "caring", "confusion", "curiosity",
+            "desire", "disappointment", "disapproval", "disgust",
+            "embarrassment", "excitement", "fear", "gratitude",
+            "grief", "joy", "love", "nervousness",
+            "optimism", "pride", "realization", "relief",
+            "remorse", "sadness", "surprise", "neutral"
+        ]
         
-        if not os.path.exists(model_path):
-            logger.error(f"Model path {model_path} does not exist. Please train the model first.")
-            raise FileNotFoundError(f"Model directory {model_path} not found.")
-            
-        logger.info(f"Loading model from {model_path} and tokenizer from {tokenizer_path} onto {self.device}...")
+        id2label = {i: label for i, label in enumerate(self.emotion_labels)}
+        label2id = {label: i for i, label in enumerate(self.emotion_labels)}
+
+        if local_model_path is not None:
+            logger.info(f"Loading local model from {local_model_path} and tokenizer from {tokenizer_path} onto {self.device}...")
+            model_source = local_model_path
+        else:
+            logger.info(f"No local model files found. Loading Hugging Face model from {model_path} onto {self.device}...")
+            model_source = model_path
+
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
-        self.model = AutoModelForSequenceClassification.from_pretrained(model_path)
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            model_source,
+            num_labels=len(self.emotion_labels),
+            id2label=id2label,
+            label2id=label2id,
+            ignore_mismatched_sizes=True,
+            max_position_embeddings=514,
+            type_vocab_size=1
+        )
         self.model.to(self.device)
         self.model.eval()
 

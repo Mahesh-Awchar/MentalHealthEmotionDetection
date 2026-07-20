@@ -1,11 +1,11 @@
 import os
 import torch
 from transformers import Trainer, TrainingArguments
-from MentalHealthEmotionDetection.src.utils import logger, compute_metrics, plot_training_history
-from MentalHealthEmotionDetection.src.dataset import EmotionDatasetManager
-from MentalHealthEmotionDetection.src.model import get_model
+from src.utils import logger, compute_metrics, plot_training_history
+from src.dataset import EmotionDatasetManager
+from src.model import get_model
 
-def train_model(output_dir="models", epochs=1, batch_size=16):
+def train_model(output_dir="models/roberta_goemotions_model", epochs=1, batch_size=16):
     """
     Full training pipeline: loads data, model, and runs the CustomTrainer.
     """
@@ -27,7 +27,7 @@ def train_model(output_dir="models", epochs=1, batch_size=16):
     # 3. Define Training Arguments
     training_args = TrainingArguments(
         output_dir=output_dir,
-        evaluation_strategy="epoch",
+        eval_strategy="epoch",
         save_strategy="epoch",
         learning_rate=2e-5,
         per_device_train_batch_size=batch_size,
